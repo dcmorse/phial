@@ -20,6 +20,9 @@ namespace phial
             Console.WriteLine(onOnTheyWent);
             Console.WriteLine(weShallGetIt);
             Console.WriteLine(shelobsLair);
+            Tile[] tiles = new Tile[] {t, e, phial, theRingIsMine};
+            Quest q = new Quest(5, 1, 9, tiles).run();
+            Console.WriteLine(q);
         }
     }
 }
