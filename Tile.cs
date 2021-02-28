@@ -16,13 +16,13 @@ namespace phial
         public virtual bool isEye() {
             return false;
         }
-        public bool isSpecial() {
-            return isFellowshipSpecial() || isShadowSpecial();
+        public bool IsSpecial() {
+            return IsFellowshipSpecial() || IsShadowSpecial();
         }
-        public virtual bool isFellowshipSpecial() {
+        public virtual bool IsFellowshipSpecial() {
             return false;
         }
-        public virtual bool isShadowSpecial() {
+        public virtual bool IsShadowSpecial() {
             return false;
         }
         public override string ToString() {
@@ -61,13 +61,13 @@ namespace phial
 
     class FellowshipSpecialTile : NumericTile {
         public FellowshipSpecialTile(int n) : base(n, false) {}
-        public override bool isFellowshipSpecial() {
+        public override bool IsFellowshipSpecial() {
             return true;
         }
     }
 
     class TheRingIsMine : EyeTile {
-        public override bool isShadowSpecial() {
+        public override bool IsShadowSpecial() {
             return true;
         }
         public override bool Stop() {
@@ -81,7 +81,7 @@ namespace phial
 
     class ShadowSpecialNumericTile : NumericTile {
         public ShadowSpecialNumericTile(int n, bool reveal) : base(n, reveal) {}
-        public override bool isShadowSpecial() {
+        public override bool IsShadowSpecial() {
             return true;
         }
         public override bool Stop() {
@@ -92,7 +92,7 @@ namespace phial
 
     class ShelobsLair : Tile {
         public ShelobsLair() : base(false) {}
-        public override bool isShadowSpecial() {
+        public override bool IsShadowSpecial() {
             return true;
         }
         public override bool Stop() {
