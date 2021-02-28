@@ -111,7 +111,7 @@ namespace phial
             return true;
         }
         public override int Value(int huntHits) {
-            return 6; // TODO 1d6
+            return Dice.D6();
         }
     }
 }
