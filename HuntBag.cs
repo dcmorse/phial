@@ -15,6 +15,7 @@ namespace phial
         public Tile DrawTile()
         {
             var i = random.Next(0, Tiles.Count);
+            // Console.WriteLine($"    draw tile {i} of {Tiles.Count}");
             var tile = Tiles[i];
             Tiles.RemoveAt(i);
             return tile;

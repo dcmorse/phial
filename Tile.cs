@@ -31,6 +31,24 @@ namespace phial
         public string ToStringSuffix() {
             return $"{(Reveal() ? "r" : "")}{(Stop() ? " stop" : "")}";
         }
+        public static Tile[] Tiles = new Tile[] {
+            new NumericTile(1, false), 
+            new NumericTile(1, false), 
+            new NumericTile(2, false), 
+            new NumericTile(2, false),
+            new NumericTile(3, false), 
+            new NumericTile(3, false), 
+            new NumericTile(3, false), 
+            new NumericTile(0, true), 
+            new NumericTile(0, true), 
+            new NumericTile(1, true), 
+            new NumericTile(1, true), 
+            new NumericTile(2, true),
+            new EyeTile(),
+            new EyeTile(),
+            new EyeTile(),
+            new EyeTile(),
+        };
     }
 
     class NumericTile : Tile

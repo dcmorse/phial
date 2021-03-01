@@ -13,8 +13,7 @@ namespace phial
             ShadowSpecialNumericTile onOnTheyWent = new ShadowSpecialNumericTile(3, false);
             ShadowSpecialNumericTile weShallGetIt = new ShadowSpecialNumericTile(1, true);
             ShelobsLair shelobsLair = new ShelobsLair();
-            Tile[] tiles = new Tile[] {t, e, phial, theRingIsMine};
-            Quest q = new Quest(5, 1, 9, tiles).MordorTrack();
+            Quest q = new Quest(5, 1, 9, Tile.Tiles).MordorTrack();
             Console.WriteLine(q);
         }
     }

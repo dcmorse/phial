@@ -43,18 +43,27 @@ namespace phial
             for (Turns = 1; ; Turns++)
             {
                 var eyes = ShadowHuntAllocated + Dice.CountHits(ShadowRolled, 6);
-
+                bool movedOrHidThisTurn = false;
                 Console.WriteLine($"Turn {Turns}: {eyes} eyes");
-                for (int swords = Dice.CountHits(FreeDice, 4); swords > 0; swords--)
-                {
-                    var tile = HuntBag.DrawTile();
-                    Corruption += eyes;
-                    Step++;
-                    eyes++;
-                    Console.WriteLine($"  step {Step} <{tile}> corruption {Corruption}");
-
-                    if (IsOver())
-                        return this;
+                for (int swords = Dice.CountHits(FreeDice, 4); swords > 0; swords--) {
+                    if (Revealed)  {
+                        Revealed = false;
+                        Console.WriteLine($"  hide");
+                    } else {
+                        var tile = HuntBag.DrawTile();
+                        Corruption += tile.Value(eyes);
+                        Step++;
+                        eyes++;
+                        Revealed = tile.Reveal();
+                        Console.WriteLine($"  step {Step} <{tile}> corruption {Corruption}, {eyes} eyes");
+                        if (IsOver())
+                            return this;
+                    }
+                    movedOrHidThisTurn = true;
+                }
+                if (!movedOrHidThisTurn) {
+                    Corruption++;
+                    Console.WriteLine("  lazy hobbit corruption");
                 }
             }
         }
