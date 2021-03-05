@@ -3,6 +3,10 @@ namespace phial
     abstract class Companion
     {
         public abstract int Level();
+        public virtual bool IsRemovable()
+        {
+            return true;
+        }
     }
     class Level3 : Companion
     {
@@ -49,5 +53,9 @@ namespace phial
     class Gollum : Companion
     {
         public override int Level() { return 0; }
+        public override bool IsRemovable()
+        {
+            return false;
+        }
     }
 }

@@ -87,7 +87,7 @@ namespace phial
                 int damage = Math.Max(0, tileValue - Fellowship.Guide.Level());
                 Corruption += damage;
                 Console.WriteLine($"    {Fellowship.Guide} falls against {tileValue} damage");
-                Fellowship = Fellowship.LoseCompanion(Fellowship.Guide);
+                Fellowship = Fellowship.RemoveCompanion(Fellowship.Guide);
             }
         }
 

@@ -16,9 +16,11 @@ namespace phial
             Companions = companions;
         }
 
-        public Fellowship LoseCompanion(Companion casualty)
+        public Fellowship RemoveCompanion(Companion casualty)
         {
-            return new Fellowship(Companions.Where(companion => companion != casualty).ToArray());
+            if (casualty.IsRemovable())
+                return new Fellowship(Companions.Where(companion => companion != casualty).ToArray());
+            else return this;
         }
 
         private Companion[] Companions { get; }
