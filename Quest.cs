@@ -6,19 +6,16 @@ namespace phial
 {
     class Quest
     {
-        public Quest(int freeDice, int shadowHuntAllocated, int shadowRolled, Tile[] tiles)
+        public Quest(int shadowHuntAllocated)
         {
-            FreeDice = freeDice;
             ShadowHuntAllocated = shadowHuntAllocated;
-            ShadowRolled = shadowRolled;
-            Tiles = tiles;
-            HuntBag = new HuntBag(Tiles);
+            ShadowRolled = 7 - shadowHuntAllocated;
+            HuntBag = new HuntBag(Tile.GreyTiles);
         }
 
-        private int FreeDice { get; }
+        private int FreeDice { get; } = 4;
         private int ShadowHuntAllocated { get; }
         private int ShadowRolled { get; }
-        private Tile[] Tiles { get; }
         private HuntBag HuntBag { get; }
 
         public bool IsOver()
@@ -60,9 +57,7 @@ namespace phial
                         int huntValue = tile.Value(eyes);
                         Console.WriteLine($"  from step {Step} <{tile}> = {huntValue}");
                         Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
-                        // Corruption = corruption
                         if (!tile.Stop()) Step++;
-                        // Revealed ||= reveal;
                         eyes++;
                         Console.WriteLine($"    corruption {Corruption}, {eyes} eyes");
                         if (IsOver())
