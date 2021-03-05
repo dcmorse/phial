@@ -2,21 +2,21 @@ using System;
 
 namespace phial
 {
-    static class Dice
+    static class D6
     {
         public static int CountHits(int ndice, int toHit)
         {
             int hits = 0;
             var ndice2 = ndice;
             for (; ndice > 0; ndice--)
-                if (D6() >= toHit)
+                if (roll() >= toHit)
                     hits++;
             // Console.WriteLine($"    CountHits({ndice2}, {toHit}) => {hits}");
             return hits;
         }
 
 
-        public static int D6()
+        public static int roll()
         {
             var d6 = random.Next(1, 7);
             // Console.WriteLine($"      d6 {d6}");

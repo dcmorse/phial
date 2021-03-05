@@ -157,7 +157,7 @@ namespace phial
         }
         public override int Value(int huntHits)
         {
-            return Dice.D6();
+            return D6.roll();
         }
     }
 }

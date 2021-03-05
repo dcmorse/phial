@@ -28,23 +28,60 @@ namespace phial
         }
         public bool IsRingDestroyed()
         {
-            return Step >= 5;
+            return MordorTrackStep >= 5;
         }
         public int Turns { get; set; } = 0;
         public int Corruption { get; set; } = 0;
-        public int Step { get; set; } = 0;
+        public int MordorTrackStep { get; set; } = 0;
         public bool Revealed { get; set; } = false;
         public Fellowship Fellowship { get; set; } = new Fellowship();
         public Strategy Strategy { get; set; } = new KillGuide();
 
+        public Quest FromRivendell()
+        {
+            Turns = 1;
+            return MordorTrack();
+            //     for (Turns = 1; ; Turns++)
+            //     {
+            //         int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
+            //         bool movedOrHidThisTurn = false;
+            //         Console.WriteLine($"Turn {Turns}: {eyes} eyes");
+            //         for (int swords = D6.CountHits(FreeDice, 4); swords > 0; swords--)
+            //         {
+            //             if (Revealed)
+            //             {
+            //                 Revealed = false;
+            //                 Console.WriteLine($"  hide");
+            //             }
+            //             else
+            //             {
+            //                 var tile = HuntBag.DrawTile();
+            //                 int huntValue = tile.Value(eyes);
+            //                 Console.WriteLine($"  from step {MordorTrackStep} <{tile}> = {huntValue}");
+            //                 Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
+            //                 if (!tile.Stop()) MordorTrackStep++;
+            //                 eyes++;
+            //                 Console.WriteLine($"    corruption {Corruption}, {eyes} eyes");
+            //                 if (IsOver())
+            //                     return this;
+            //             }
+            //             movedOrHidThisTurn = true;
+            //         }
+            //         if (!movedOrHidThisTurn)
+            //         {
+            //             Corruption++;
+            //             Console.WriteLine("  lazy hobbit corruption");
+            //         }
+            //     }
+        }
         public Quest MordorTrack()
         {
-            for (Turns = 1; ; Turns++)
+            for (; ; Turns++)
             {
-                int eyes = ShadowHuntAllocated + Dice.CountHits(ShadowRolled, 6);
+                int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
                 bool movedOrHidThisTurn = false;
                 Console.WriteLine($"Turn {Turns}: {eyes} eyes");
-                for (int swords = Dice.CountHits(FreeDice, 4); swords > 0; swords--)
+                for (int swords = D6.CountHits(FreeDice, 4); swords > 0; swords--)
                 {
                     if (Revealed)
                     {
@@ -55,9 +92,9 @@ namespace phial
                     {
                         var tile = HuntBag.DrawTile();
                         int huntValue = tile.Value(eyes);
-                        Console.WriteLine($"  from step {Step} <{tile}> = {huntValue}");
+                        Console.WriteLine($"  from step {MordorTrackStep} <{tile}> = {huntValue}");
                         Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
-                        if (!tile.Stop()) Step++;
+                        if (!tile.Stop()) MordorTrackStep++;
                         eyes++;
                         Console.WriteLine($"    corruption {Corruption}, {eyes} eyes");
                         if (IsOver())
@@ -72,7 +109,6 @@ namespace phial
                 }
             }
         }
-
 
         public void TakeGuideCasualty(int tileValue, bool reveal, Tile tile)
         {
@@ -89,11 +125,11 @@ namespace phial
         public override string ToString()
         {
             if (IsCorrupted())
-                return $"Corruption win at step {Step}";
+                return $"Corruption win at step {MordorTrackStep}";
             else if (IsRingDestroyed())
                 return $"Ring Destroyed at corruption {Corruption}";
             else
-                return $"Step {Step} Corruption {Corruption}{(Revealed ? " revealed" : "")}";
+                return $"Step {MordorTrackStep} Corruption {Corruption}{(Revealed ? " revealed" : "")}";
         }
     }
 }
