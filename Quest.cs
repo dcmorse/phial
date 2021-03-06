@@ -10,7 +10,7 @@ namespace phial
         {
             ShadowHuntAllocated = shadowHuntAllocated;
             ShadowRolled = 7 - shadowHuntAllocated;
-            HuntBag = new HuntBag(Tile.GreyTiles);
+            HuntBag = new HuntBag();
         }
 
         private int FreeDice { get; } = 4;
