@@ -6,7 +6,7 @@ namespace phial
     {
         static void Main(string[] args)
         {
-            Quest q = new Quest(1).MordorTrack();
+            Quest q = new Quest(1).FromRivendell();
             Console.WriteLine(q);
         }
     }
