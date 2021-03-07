@@ -61,6 +61,7 @@ namespace phial
                 TookMoria = 10 == EffectiveDistanceFromRivendell;
             }
             Progress = 0;
+            Console.WriteLine("____Enter Mordor____");
         }
 
         // returns the number of stronghold tiles to take
@@ -73,14 +74,17 @@ namespace phial
                 // Need some testing. 
                 if (2 == EffectiveDistanceFromRivendell)
                 {
+                    Console.WriteLine("    In Hollin");
                     TookMoria = true;
                 }
                 else if (3 == EffectiveDistanceFromRivendell)
                 {
+                    Console.WriteLine("    In Goblin's Gate");
                     TookMoria = false;
                 }
                 else if (3 < EffectiveDistanceFromRivendell)
                 {
+                    Console.WriteLine("    Taking the Moria route");
                     TookMoria = true;
                 }
             }
@@ -106,7 +110,7 @@ namespace phial
             for (; ntiles > 0; ntiles--)
             {
                 var tile = HuntBag.DrawTile();
-                Console.WriteLine($"    Stronghold {tile}");
+                Console.WriteLine($"    stronghold tile {tile}");
                 Strategy.Hunt(tile.Value(0), false, tile, this);
             }
         }
@@ -133,21 +137,27 @@ namespace phial
                             var tile = HuntBag.DrawTile();
                             int huntValue = tile.Value(hits);
                             bool wasRevealed = Revealed;
-                            Console.WriteLine($"  from {EffectiveDistanceFromRivendell} steps from Rivendell <{tile}> = {huntValue}");
+                            int newEffectiveDistance = Progress + 1;
+                            Console.WriteLine($"  walk {newEffectiveDistance} {Pluralize("step", newEffectiveDistance)} from Rivendell - {huntValue} {Pluralize("hit", huntValue)} - {tile}");
                             Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
-                            Progress++;
+                            ++Progress;
                             bool freshlyRevealed = (!wasRevealed) && Revealed;
                             if (freshlyRevealed) RevealFellowshipOutsideMordorAndResolveStrongholdTiles();
-                            freeHuntBoxDiceCount++;
+                            ++freeHuntBoxDiceCount;
                             Console.WriteLine($"    corruption {Corruption}, {eyes} eyes");
-                            if (IsOver())
-                                return this;
-                            if (AtTheGatesOfMordor())
-                            {
-                                EnterMordor();
-                                return MordorTrack();
-                            }
                         }
+                        else
+                        {
+                            Progress++;
+                            Console.WriteLine($"  walk {EffectiveDistanceFromRivendell} {Pluralize("step", EffectiveDistanceFromRivendell)} from Rivendell");
+                        }
+                    }
+                    if (IsOver())
+                        return this;
+                    if (AtTheGatesOfMordor())
+                    {
+                        EnterMordor();
+                        return MordorTrack();
                     }
                 }
             }
@@ -171,7 +181,7 @@ namespace phial
                     {
                         var tile = HuntBag.DrawTile();
                         int huntValue = tile.Value(eyes);
-                        Console.WriteLine($"  from step {MordorTrackStep} <{tile}> = {huntValue}");
+                        Console.WriteLine($"  from step {MordorTrackStep} {tile} = {huntValue}");
                         Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
                         if (!tile.Stop()) MordorTrackStep++;
                         eyes++;
@@ -209,6 +219,11 @@ namespace phial
                 return $"Ring Destroyed at corruption {Corruption}";
             else
                 return $"Step {MordorTrackStep} Corruption {Corruption}{(Revealed ? " revealed" : "")}";
+        }
+
+        private string Pluralize(string s, int n)
+        {
+            return n == 1 ? s : $"{s}s";
         }
     }
 }

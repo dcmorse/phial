@@ -34,6 +34,10 @@ namespace phial
         }
         public override string ToString()
         {
+            return $"[{ToStringHelper()}]";
+        }
+        public virtual string ToStringHelper()
+        {
             return $"{GetType().Name} {ToStringSuffix()}";
         }
         public string ToStringSuffix()
@@ -85,9 +89,9 @@ namespace phial
         {
             return Number;
         }
-        public override string ToString()
+        public override string ToStringHelper()
         {
-            return $"{GetType().Name} {Number}{ToStringSuffix()}";
+            return $"{Number}{ToStringSuffix()}";
         }
     }
 
@@ -102,6 +106,10 @@ namespace phial
         {
             return huntHits;
         }
+        public override string ToStringHelper()
+        {
+            return "Eye";
+        }
     }
 
     class FellowshipSpecialTile : NumericTile
@@ -110,6 +118,11 @@ namespace phial
         public override bool IsFellowshipSpecial()
         {
             return true;
+        }
+
+        public override string ToStringHelper()
+        {
+            return $"Blue {base.ToStringHelper()}";
         }
     }
 
@@ -124,9 +137,9 @@ namespace phial
             return true;
         }
 
-        public override string ToString()
+        public override string ToStringHelper()
         {
-            return $"{GetType().Name} Eye {ToStringSuffix()}";
+            return $"Red Eye {ToStringSuffix()}";
         }
     }
 
@@ -140,6 +153,11 @@ namespace phial
         public override bool Stop()
         {
             return true;
+        }
+
+        public override string ToStringHelper()
+        {
+            return $"Red {base.ToStringHelper()}";
         }
     }
 
@@ -158,6 +176,11 @@ namespace phial
         public override int Value(int huntHits)
         {
             return D6.roll();
+        }
+
+        public override string ToStringHelper()
+        {
+            return $"Red D6 {ToStringSuffix()}";
         }
     }
 }
