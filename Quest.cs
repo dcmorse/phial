@@ -13,7 +13,6 @@ namespace phial
             HuntBag = new HuntBag();
         }
 
-        private int FreeDice { get; } = 4;
         private int ShadowHuntAllocated { get; }
         private int ShadowRolled { get; }
         private HuntBag HuntBag { get; }
@@ -142,7 +141,6 @@ namespace phial
                 {
                     if (PromoteGandalfIfAble(freeDice)){
                         // do nothing
-                        // TODO: put in Mordor Track
                     }
                     else if (Revealed)
                     {
@@ -159,7 +157,7 @@ namespace phial
                             int huntValue = tile.Value(hits);
                             bool wasRevealed = Revealed;
                             int newEffectiveDistance = Progress + 1;
-                            Console.WriteLine($"  walk {newEffectiveDistance} {Pluralize("step", newEffectiveDistance)} from Rivendell  - {huntValue} {Pluralize("hit", huntValue)} - {tile}");
+                            Console.WriteLine($"  walk {newEffectiveDistance} {Pluralize("step", newEffectiveDistance)} from Rivendell  - {hits} {Pluralize("hit", hits)} - {tile}");
                             Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
                             ++Progress;
                             bool freshlyRevealed = (!wasRevealed) && Revealed;
@@ -192,7 +190,8 @@ namespace phial
                 int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
                 bool movedOrHidThisTurn = false;
                 Console.WriteLine($"Turn {Turns}: {eyes} eyes");
-                for (int swords = D6.CountHits(FreeDice, 4); swords > 0; swords--)
+                // TODO: convert to use FreeActionDice
+                for (int swords = D6.CountHits(FreeActionDiceCount, 4); swords > 0; swords--)
                 {
                     if (Revealed)
                     {
