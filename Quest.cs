@@ -115,19 +115,40 @@ namespace phial
             }
         }
 
+        bool GandalfDeadTheFirstTime { get; set; } = false; // set to true when he leaves fsp
+        int FreeActionDiceCount { get; set; } = 4;
+
+        bool PromoteGandalfIfAble(FreeActionDiceRoll freeDice) {
+            if (GandalfDeadTheFirstTime && freeDice.WillOfTheWests > 0) {
+                GandalfDeadTheFirstTime = false; 
+                --freeDice.WillOfTheWests;
+                ++FreeActionDiceCount;
+                Console.WriteLine("  ____Gandalf the White____");
+                return true;    
+            } else 
+                return false;
+        }
+
         public Quest FromRivendell()
         {
             for (Turns = 1; ; Turns++)
             {
                 int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
                 int freeHuntBoxDiceCount = 0;
-                Console.WriteLine($"Turn {Turns}: {eyes} eyes");
-                for (int swords = D6.CountHits(FreeDice, 4); swords > 0; swords--)
+                var freeDice = new FreeActionDiceRoll(FreeActionDiceCount); 
+                Console.WriteLine($"Turn {Turns}: {eyes} eyes, {freeDice}");
+                
+                while (freeDice.CharacterOrWills > 0)
                 {
-                    if (Revealed)
+                    if (PromoteGandalfIfAble(freeDice)){
+                        // do nothing
+                        // TODO: put in Mordor Track
+                    }
+                    else if (Revealed)
                     {
                         Revealed = false;
                         Console.WriteLine($"  hide");
+                        freeDice.SpendCharacterOrWill();
                     }
                     else
                     {
@@ -138,7 +159,7 @@ namespace phial
                             int huntValue = tile.Value(hits);
                             bool wasRevealed = Revealed;
                             int newEffectiveDistance = Progress + 1;
-                            Console.WriteLine($"  walk {newEffectiveDistance} {Pluralize("step", newEffectiveDistance)} from Rivendell - {huntValue} {Pluralize("hit", huntValue)} - {tile}");
+                            Console.WriteLine($"  walk {newEffectiveDistance} {Pluralize("step", newEffectiveDistance)} from Rivendell  - {huntValue} {Pluralize("hit", huntValue)} - {tile}");
                             Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
                             ++Progress;
                             bool freshlyRevealed = (!wasRevealed) && Revealed;
@@ -151,6 +172,7 @@ namespace phial
                             Progress++;
                             Console.WriteLine($"  walk {EffectiveDistanceFromRivendell} {Pluralize("step", EffectiveDistanceFromRivendell)} from Rivendell");
                         }
+                        freeDice.SpendCharacterOrWill();
                     }
                     if (IsOver())
                         return this;
@@ -199,7 +221,7 @@ namespace phial
             }
         }
 
-        public void TakeGuideCasualty(int tileValue, bool reveal, Tile tile)
+        public void ResolveTileWithGuideCasualty(int tileValue, bool reveal, Tile tile)
         {
             Revealed = Revealed || reveal;
             if (tileValue > 0)
@@ -207,8 +229,14 @@ namespace phial
                 int damage = Math.Max(0, tileValue - Fellowship.Guide.Level());
                 Corruption += damage;
                 Console.WriteLine($"    {Fellowship.Guide} falls to {tileValue} damage");
-                Fellowship = Fellowship.RemoveCompanion(Fellowship.Guide);
+                TakeCasualty(Fellowship.Guide);
             }
+        }
+
+        void TakeCasualty(Companion c) {
+            if (c is Gandalf)
+                GandalfDeadTheFirstTime = true;
+            Fellowship = Fellowship.RemoveCompanion(c);
         }
 
         public override string ToString()
