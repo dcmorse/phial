@@ -156,8 +156,7 @@ namespace phial
                             var tile = HuntBag.DrawTile();
                             int huntValue = tile.Value(hits);
                             bool wasRevealed = Revealed;
-                            int newEffectiveDistance = Progress + 1;
-                            Console.WriteLine($"  walk {newEffectiveDistance} {Pluralize("step", newEffectiveDistance)} from Rivendell  - {hits} {Pluralize("hit", hits)} - {tile}");
+                            Console.WriteLine($"  walk {EffectiveDistanceFromRivendell+1} {Pluralize("step", EffectiveDistanceFromRivendell+1)} from Rivendell  - {hits} {Pluralize("hit", hits)} - {tile}");
                             Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
                             ++Progress;
                             bool freshlyRevealed = (!wasRevealed) && Revealed;
@@ -191,6 +190,7 @@ namespace phial
                 bool movedOrHidThisTurn = false;
                 Console.WriteLine($"Turn {Turns}: {eyes} eyes");
                 // TODO: convert to use FreeActionDice
+
                 for (int swords = D6.CountHits(FreeActionDiceCount, 4); swords > 0; swords--)
                 {
                     if (Revealed)
