@@ -60,7 +60,7 @@ namespace phial
                 TookMoria = 10 == EffectiveDistanceFromRivendell;
             }
             Progress = 0;
-            Console.WriteLine("____Enter Mordor____");
+            Console.WriteLine($"____Enter Mordor____  took moria = {TookMoria}");
         }
 
         // returns the number of stronghold tiles to take
@@ -188,15 +188,17 @@ namespace phial
             {
                 int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
                 bool movedOrHidThisTurn = false;
-                Console.WriteLine($"Turn {Turns}: {eyes} eyes");
-                // TODO: convert to use FreeActionDice
+                var freeDice = new FreeActionDiceRoll(FreeActionDiceCount);
 
-                for (int swords = D6.CountHits(FreeActionDiceCount, 4); swords > 0; swords--)
+                Console.WriteLine($"Turn {Turns}: {eyes} eyes, {freeDice}");
+                
+                while (freeDice.CharacterOrWills > 0)
                 {
                     if (Revealed)
                     {
                         Revealed = false;
                         Console.WriteLine($"  hide");
+                        freeDice.SpendCharacterOrWill();
                     }
                     else
                     {
@@ -207,6 +209,7 @@ namespace phial
                         if (!tile.Stop()) MordorTrackStep++;
                         eyes++;
                         Console.WriteLine($"    corruption {Corruption}, {eyes} eyes");
+                        freeDice.SpendCharacterOrWill();
                         if (IsOver())
                             return this;
                     }
