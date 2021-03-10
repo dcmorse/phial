@@ -32,9 +32,9 @@ namespace phial
 
         public bool AtTheGatesOfMordor()
         {
-            int moves = Progress + LastKnownDistanceFromRivendell;
+            int moves = EffectiveDistanceFromRivendell;
             int movesNeeded = 10 + (TookMoria ?? true ? 0 : 1);
-            return moves > movesNeeded;
+            return moves >= movesNeeded;
         }
         public int Turns { get; set; } = 0;
         public int Corruption { get; set; } = 0;
@@ -132,6 +132,11 @@ namespace phial
         {
             for (Turns = 1; ; Turns++)
             {
+                if (AtTheGatesOfMordor())
+                {
+                    EnterMordor();
+                    return MordorTrack();
+                }
                 int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
                 int freeHuntBoxDiceCount = 0;
                 var freeDice = new FreeActionDiceRoll(FreeActionDiceCount); 
@@ -147,6 +152,11 @@ namespace phial
                         Revealed = false;
                         Console.WriteLine($"  hide");
                         freeDice.SpendCharacterOrWill();
+                    }
+                    else if (AtTheGatesOfMordor())
+                    {
+                        EnterMordor();
+                        return MordorTrack();
                     }
                     else
                     {
@@ -173,11 +183,6 @@ namespace phial
                     }
                     if (IsOver())
                         return this;
-                    if (AtTheGatesOfMordor())
-                    {
-                        EnterMordor();
-                        return MordorTrack();
-                    }
                 }
             }
         }
