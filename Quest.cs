@@ -1,21 +1,22 @@
-using System;
-
 using System.Collections.Generic;
+using System;
 
 namespace phial
 {
     class Quest
     {
-        public Quest(int shadowHuntAllocated)
+        public Quest(int shadowHuntAllocated, ILogger log)
         {
             ShadowHuntAllocated = shadowHuntAllocated;
             ShadowRolled = 7 - shadowHuntAllocated;
             HuntBag = new HuntBag();
+            Log = log;
         }
 
         private int ShadowHuntAllocated { get; }
         private int ShadowRolled { get; }
         private HuntBag HuntBag { get; }
+        private ILogger Log { get; }
 
         public bool IsOver()
         {
@@ -27,7 +28,7 @@ namespace phial
         }
         public bool IsRingDestroyed()
         {
-            return MordorTrackStep >= 5;
+            return MordorTrackStep >= 5 && !IsCorrupted();
         }
 
         public bool AtTheGatesOfMordor()
@@ -60,7 +61,7 @@ namespace phial
                 TookMoria = 10 == EffectiveDistanceFromRivendell;
             }
             Progress = 0;
-            Console.WriteLine($"____Enter Mordor____  took moria = {TookMoria}");
+            Log.Log($"____Enter Mordor____  took moria = {TookMoria}");
         }
 
         // returns the number of stronghold tiles to take
@@ -73,17 +74,17 @@ namespace phial
                 // Need some testing. 
                 if (2 == EffectiveDistanceFromRivendell)
                 {
-                    Console.WriteLine("    In Hollin");
+                    Log.Log("    In Hollin");
                     TookMoria = true;
                 }
                 else if (3 == EffectiveDistanceFromRivendell)
                 {
-                    Console.WriteLine("    In Goblin's Gate");
+                    Log.Log("    In Goblin's Gate");
                     TookMoria = false;
                 }
                 else if (3 < EffectiveDistanceFromRivendell)
                 {
-                    Console.WriteLine("    Taking the Moria route");
+                    Log.Log("    Taking the Moria route");
                     TookMoria = true;
                 }
             }
@@ -109,7 +110,7 @@ namespace phial
             for (; ntiles > 0; ntiles--)
             {
                 var tile = HuntBag.DrawTile();
-                Console.WriteLine($"    stronghold tile {tile}");
+                Log.Log($"    stronghold tile {tile}");
                 Strategy.Hunt(tile.Value(0), false, tile, this);
             }
         }
@@ -122,7 +123,7 @@ namespace phial
                 GandalfDeadTheFirstTime = false; 
                 --freeDice.WillOfTheWests;
                 ++FreeActionDiceCount;
-                Console.WriteLine("  ____Gandalf the White____");
+                Log.Log("  ____Gandalf the White____");
                 return true;    
             } else 
                 return false;
@@ -140,7 +141,7 @@ namespace phial
                 int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
                 int freeHuntBoxDiceCount = 0;
                 var freeDice = new FreeActionDiceRoll(FreeActionDiceCount); 
-                Console.WriteLine($"Turn {Turns}: {eyes} eyes, {freeDice}");
+                Log.Log($"Turn {Turns}: {eyes} eyes, {freeDice}");
                 
                 while (freeDice.CharacterOrWills > 0)
                 {
@@ -150,7 +151,7 @@ namespace phial
                     else if (Revealed)
                     {
                         Revealed = false;
-                        Console.WriteLine($"  hide");
+                        Log.Log($"  hide");
                         freeDice.SpendCharacterOrWill();
                     }
                     else if (AtTheGatesOfMordor())
@@ -166,18 +167,18 @@ namespace phial
                             var tile = HuntBag.DrawTile();
                             int huntValue = tile.Value(hits);
                             bool wasRevealed = Revealed;
-                            Console.WriteLine($"  walk {EffectiveDistanceFromRivendell+1} {Pluralize("step", EffectiveDistanceFromRivendell+1)} from Rivendell  - {hits} {Pluralize("hit", hits)} - {tile}");
+                            Log.Log($"  walk {EffectiveDistanceFromRivendell+1} {Pluralize("step", EffectiveDistanceFromRivendell+1)} from Rivendell  - {hits} {Pluralize("hit", hits)} - {tile}");
                             Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
                             ++Progress;
                             bool freshlyRevealed = (!wasRevealed) && Revealed;
                             if (freshlyRevealed) RevealFellowshipOutsideMordorAndResolveStrongholdTiles();
                             ++freeHuntBoxDiceCount;
-                            Console.WriteLine($"    corruption {Corruption}, {eyes} eyes");
+                            Log.Log($"    corruption {Corruption}, {eyes} eyes");
                         }
                         else
                         {
                             Progress++;
-                            Console.WriteLine($"  walk {EffectiveDistanceFromRivendell} {Pluralize("step", EffectiveDistanceFromRivendell)} from Rivendell");
+                            Log.Log($"  walk {EffectiveDistanceFromRivendell} {Pluralize("step", EffectiveDistanceFromRivendell)} from Rivendell");
                         }
                         freeDice.SpendCharacterOrWill();
                     }
@@ -195,25 +196,25 @@ namespace phial
                 bool movedOrHidThisTurn = false;
                 var freeDice = new FreeActionDiceRoll(FreeActionDiceCount);
 
-                Console.WriteLine($"Turn {Turns}: {eyes} eyes, {freeDice}");
+                Log.Log($"Turn {Turns}: {eyes} eyes, {freeDice}");
                 
                 while (freeDice.CharacterOrWills > 0)
                 {
                     if (Revealed)
                     {
                         Revealed = false;
-                        Console.WriteLine($"  hide");
+                        Log.Log($"  hide");
                         freeDice.SpendCharacterOrWill();
                     }
                     else
                     {
                         var tile = HuntBag.DrawTile();
                         int huntValue = tile.Value(eyes);
-                        Console.WriteLine($"  from step {MordorTrackStep} {tile} = {huntValue}");
+                        Log.Log($"  from step {MordorTrackStep} {tile} = {huntValue}");
                         Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
                         if (!tile.Stop()) MordorTrackStep++;
                         eyes++;
-                        Console.WriteLine($"    corruption {Corruption}, {eyes} eyes");
+                        Log.Log($"    corruption {Corruption}, {eyes} eyes");
                         freeDice.SpendCharacterOrWill();
                         if (IsOver())
                             return this;
@@ -223,7 +224,7 @@ namespace phial
                 if (!movedOrHidThisTurn)
                 {
                     Corruption++;
-                    Console.WriteLine("  lazy hobbit corruption");
+                    Log.Log("  lazy hobbit corruption");
                 }
             }
         }
@@ -235,7 +236,7 @@ namespace phial
             {
                 int damage = Math.Max(0, tileValue - Fellowship.Guide.Level());
                 Corruption += damage;
-                Console.WriteLine($"    {Fellowship.Guide} falls to {tileValue} damage");
+                Log.Log($"    {Fellowship.Guide} falls to {tileValue} damage");
                 TakeCasualty(Fellowship.Guide);
             }
         }

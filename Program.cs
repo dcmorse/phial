@@ -6,8 +6,7 @@ namespace phial
     {
         static void Main(string[] args)
         {
-            Quest q = new Quest(1).FromRivendell();
-            Console.WriteLine(q);
+            Trials.Run(10000, 1);
         }
     }
 }
