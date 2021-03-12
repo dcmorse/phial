@@ -1,5 +1,6 @@
-
 using System.Linq;
+using System;
+
 namespace phial
 {
     class Fellowship
@@ -9,7 +10,6 @@ namespace phial
             Companion[] companions = { new Gandalf(), new Strider(), new Legolas(), new Gimli(), new Boromir(), new Merry(), new Pippin() };
             Companions = companions;
         }
-
 
         public Fellowship(Companion[] companions)
         {
@@ -33,5 +33,9 @@ namespace phial
 
         private Companion[] Companions { get; }
         public Companion Guide { get { return Companions[0]; } }
+        public Companion Random() {
+            return Companions[RandomState.Next(Companions.Length)];
+        }
+        private Random RandomState = new Random();
     }
 }

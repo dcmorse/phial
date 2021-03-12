@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System;
-
 namespace phial
 {
     class Quest
@@ -45,7 +44,7 @@ namespace phial
         public bool? TookMoria { get; set; }
         public bool Revealed { get; set; } = false;
         public Fellowship Fellowship { get; set; } = new Fellowship();
-        public Strategy Strategy { get; set; } = new KillGuide();
+        public Strategy Strategy { get; set; } = new StriderSprint();
         public int EffectiveDistanceFromRivendell
         {
             get
@@ -231,14 +230,45 @@ namespace phial
 
         public void ResolveTileWithGuideCasualty(int tileValue, bool reveal, Tile tile)
         {
+            ResolveTileWithCasualty(Fellowship.Guide, tileValue, reveal, tile);
+        }
+        public void ResolveTileWithRandomCasualty(int tileValue, bool reveal, Tile tile)
+        {
+            ResolveTileWithCasualty(Fellowship.Random(), tileValue, reveal, tile);
+        }
+        public void ResolveTileWithCasualty(Companion companion, int tileValue, bool reveal, Tile tile)
+        {
             Revealed = Revealed || reveal;
             if (tileValue > 0)
             {
-                int damage = Math.Max(0, tileValue - Fellowship.Guide.Level());
+                int damage = Math.Max(0, tileValue - companion.Level());
                 Corruption += damage;
-                Log.Log($"    {Fellowship.Guide} falls to {tileValue} damage");
-                TakeCasualty(Fellowship.Guide);
+                Log.Log($"    {companion} falls to {tileValue} damage");
+                TakeCasualty(companion);
+            } else {
+                Corruption = Math.Max(0, Corruption + tileValue); // heal from hunt tiles
+                if (tileValue < 0) 
+                    Log.Log($"    Frodo heals to {Corruption} corruption");
             }
+        }
+
+        public void ResolveTileWithCorruption(int tileValue, bool reveal, Tile tile)
+        {
+            Revealed = Revealed || reveal;
+            Corruption = Math.Max(0, Corruption + tileValue);
+            Log.Log($"    taking {tileValue} corruption");
+        }
+
+        public void ResolveTileWithGollum(int tileValue, bool reveal, Tile tile, bool reduceDamageByRevealing)
+        {
+            if (!(tile.IsEye() || tile.IsShadowSpecial())) {
+                reveal = false;
+                if (reduceDamageByRevealing && tileValue > 0) {
+                    --tileValue;
+                    reveal = true;
+                }
+            }
+            ResolveTileWithCorruption(tileValue, reveal, tile);
         }
 
         void TakeCasualty(Companion c) {

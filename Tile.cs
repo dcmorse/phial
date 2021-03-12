@@ -16,7 +16,7 @@ namespace phial
         {
             return false;
         }
-        public virtual bool isEye()
+        public virtual bool IsEye()
         {
             return false;
         }
@@ -98,7 +98,7 @@ namespace phial
     class EyeTile : Tile
     {
         public EyeTile() : base(true) { }
-        public override bool isEye()
+        public override bool IsEye()
         {
             return true;
         }

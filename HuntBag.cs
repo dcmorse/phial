@@ -21,7 +21,7 @@ namespace phial
             var i = random.Next(0, Tiles.Count);
             var tile = Tiles[i];
             Tiles.RemoveAt(i);
-            if (tile.isEye())
+            if (tile.IsEye())
                 SetAsideTiles.Add(tile);
             return tile;
         }
