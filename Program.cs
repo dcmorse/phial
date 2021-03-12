@@ -6,8 +6,8 @@ namespace phial
     {
         static void Main(string[] args)
         {
-            Trials.Run(10000, 1);
-            // RunOne();
+            // Trials.Run(10000, 1);
+            RunOne();
         }
 
         static void RunOne() {

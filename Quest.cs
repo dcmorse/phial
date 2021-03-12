@@ -142,10 +142,17 @@ namespace phial
                 var freeDice = new FreeActionDiceRoll(FreeActionDiceCount); 
                 Log.Log($"Turn {Turns}: {eyes} eyes, {freeDice}");
                 
-                while (freeDice.CharacterOrWills > 0)
+                while (freeDice.CharacterOrWills > 0 || StriderCanHide(freeDice))
                 {
-                    if (PromoteGandalfIfAble(freeDice)){
+                    if (PromoteGandalfIfAble(freeDice))
+                    {
                         // do nothing
+                    }
+                    else if (StriderCanHide(freeDice))
+                    {
+                        Revealed = false;
+                        Log.Log($"  Strider hide");
+                        freeDice.SpendMostUselessDie();
                     }
                     else if (Revealed)
                     {
@@ -197,9 +204,15 @@ namespace phial
 
                 Log.Log($"Turn {Turns}: {eyes} eyes, {freeDice}");
                 
-                while (freeDice.CharacterOrWills > 0)
+                while (freeDice.CharacterOrWills > 0 || StriderCanHide(freeDice))
                 {
-                    if (Revealed)
+                    if (StriderCanHide(freeDice))
+                    {
+                        Revealed = false;
+                        Log.Log($"  Strider hide");
+                        freeDice.SpendMostUselessDie();
+                    }
+                    else if (Revealed)
                     {
                         Revealed = false;
                         Log.Log($"  hide");
@@ -226,6 +239,10 @@ namespace phial
                     Log.Log("  lazy hobbit corruption");
                 }
             }
+        }
+
+        private bool StriderCanHide(FreeActionDiceRoll freeDice) {
+            return Revealed && (Fellowship.Guide is Strider) && freeDice.Count > 0;
         }
 
         public void ResolveTileWithGuideCasualty(int tileValue, bool reveal, Tile tile)

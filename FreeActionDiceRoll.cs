@@ -43,6 +43,14 @@ namespace phial
             }
         }
 
+        public int Count
+        {
+            get
+            {
+                return Characters + Musters + ArmyMusters + Events + WillOfTheWests;
+            }
+        }
+
         public void SpendCharacterOrWill()
         {
             if (Characters > 0)
@@ -50,6 +58,17 @@ namespace phial
             else if (WillOfTheWests > 0)
                 --WillOfTheWests;
             else throw new InvalidOperationException("Attempt to spend action dice that don't exist.");
+        }
+
+        public void SpendMostUselessDie()
+        {
+            if (Musters > 0)
+                --Musters;
+            else if (ArmyMusters > 0)
+                --ArmyMusters;
+            else if (Events > 0)
+                --Events;
+            else SpendCharacterOrWill();
         }
 
         public override string ToString()
