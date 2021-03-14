@@ -7,19 +7,19 @@ namespace phial
     {
         public static void Run(int trialCount, int shadowDice)
         {
-            int fprvs = 0;
-            int sarvs = 0;
+            var fprvs = new Histogram<int>();
+            var sarvs = new Histogram<int>();
             var logger = new NullLogger();
             for (var i = 0; i < trialCount; i++)
             {
                 var q = new Quest(shadowDice, logger).FromRivendell();
                 if (q.IsCorrupted())
                 {
-                    ++sarvs;
+                    sarvs.Increment(q.Turns);
                 }
                 else if (q.IsRingDestroyed())
                 {
-                    ++fprvs;
+                    fprvs.Increment(q.Turns);
                 }
                 else
                 {
