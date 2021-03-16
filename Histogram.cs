@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace phial
 {
@@ -23,8 +24,8 @@ namespace phial
         public override string ToString()
         {
             var sb = new StringBuilder("");
-            foreach (T key in D.Keys)
-                sb.Append($" {key} => {D[key]}");
+            foreach (T key in D.Keys.ToList().OrderBy(n=>n))
+                sb.Append($"{key}: {D[key]}  ");
             return sb.ToString();
         }
     }
