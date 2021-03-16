@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System;
 
 namespace phial
 {
     class Histogram<T>
     {
         private Dictionary<T, int> D { get; } = new Dictionary<T, int>();
+
         public int Fetch(T key)
         {
             int n;
@@ -14,11 +16,20 @@ namespace phial
                 return n;
             else return 0;
         }
+
         public void Increment(T key)
         {
             if (D.ContainsKey(key))
                 ++D[key];
             else D[key] = 1;
+        }
+
+        public int Count() {
+            return D.Sum(kv => kv.Value);
+        }
+
+        public T Median() {
+            return D.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
         }
 
         public override string ToString()

@@ -3,32 +3,33 @@ using System;
 
 namespace phial
 {
-    static class Trials
+    class Trials
     {
-        public static void Run(int trialCount, int shadowDice)
+        int TrialCount { get; } = 10000;
+        Histogram<int> FPRVs { get; } = new Histogram<int>();
+        Histogram<int> SARVs { get; } = new Histogram<int>();
+
+        public Trials()
         {
-            var fprvs = new Histogram<int>();
-            var sarvs = new Histogram<int>();
             var logger = new NullLogger();
-            for (var i = 0; i < trialCount; i++)
+            for (var i = 0; i < TrialCount; i++)
             {
-                var q = new Quest(shadowDice, logger).FromRivendell();
+                var q = new Quest(1, logger).FromRivendell();
                 if (q.IsCorrupted())
-                {
-                    sarvs.Increment(q.Turns);
-                }
+                    SARVs.Increment(q.Turns);
                 else if (q.IsRingDestroyed())
-                {
-                    fprvs.Increment(q.Turns);
-                }
+                    FPRVs.Increment(q.Turns);
                 else
-                {
                     Debug.Assert(false, "This game isn't finished. Why?");
-                }
             }
-            Console.WriteLine($"{trialCount} trials");
-            Console.WriteLine($"{fprvs} fprvs");
-            Console.WriteLine($"{sarvs} sarvs");
+        }
+
+        public void Report() {
+
+            Console.WriteLine($"{TrialCount} trials");
+            Console.WriteLine($"FPRV median is {FPRVs.Median()} with {FPRVs.Fetch(FPRVs.Median())}");
+            Console.WriteLine($"{FPRVs} fprvs");
+            Console.WriteLine($"{SARVs} sarvs");
         }
     }
 }
