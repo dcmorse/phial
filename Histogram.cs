@@ -5,7 +5,7 @@ using System;
 
 namespace phial
 {
-    class Histogram<T>
+    class Histogram<T> where T : IComparable
     {
         private Dictionary<T, int> D { get; } = new Dictionary<T, int>();
 
@@ -26,6 +26,12 @@ namespace phial
 
         public int Count() {
             return D.Sum(kv => kv.Value);
+        }
+
+        public (T, T) Domain() {
+            var min = D.Keys.Aggregate((l, r) => l.CompareTo(r) <= 0 ? l : r);
+            var max = D.Keys.Aggregate((l, r) => l.CompareTo(r) >= 0 ? l : r);
+            return (min, max);
         }
 
         public T Median() {
