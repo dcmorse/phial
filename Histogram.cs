@@ -24,24 +24,32 @@ namespace phial
             else D[key] = 1;
         }
 
-        public int Count() {
+        public int Count()
+        {
             return D.Sum(kv => kv.Value);
         }
 
-        public (T, T) Domain() {
+        public (T, T) Domain()
+        {
             var min = D.Keys.Aggregate((l, r) => l.CompareTo(r) <= 0 ? l : r);
             var max = D.Keys.Aggregate((l, r) => l.CompareTo(r) >= 0 ? l : r);
             return (min, max);
         }
 
-        public T Median() {
+        public T MedianIndex()
+        {
             return D.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+        }
+
+        public int MedianHeight()
+        {
+            return Fetch(MedianIndex());
         }
 
         public override string ToString()
         {
             var sb = new StringBuilder("");
-            foreach (T key in D.Keys.ToList().OrderBy(n=>n))
+            foreach (T key in D.Keys.ToList().OrderBy(n => n))
                 sb.Append($"{key}: {D[key]}  ");
             return sb.ToString();
         }

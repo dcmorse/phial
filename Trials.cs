@@ -24,37 +24,33 @@ namespace phial
             }
         }
 
-        public void Report() {
+        public void Report()
+        {
             Console.WriteLine($"{TrialCount} trials");
-            Console.WriteLine($"FPRV median is {FPRVs.Median()} with {FPRVs.Fetch(FPRVs.Median())}");
+            Console.WriteLine($"FPRV median is {FPRVs.MedianIndex()} with {FPRVs.Fetch(FPRVs.MedianIndex())}");
             var (fmin, fmax) = FPRVs.Domain();
             var (smin, smax) = SARVs.Domain();
-            var min = Math.Min(fmin, smin);
-            var max = Math.Max(fmax, smax);
-            var rows = 12;
-            var rowChunk = FPRVs.Fetch(FPRVs.Median()) / rows;
-            Console.WriteLine($"rowChunk={rowChunk}");
-            for (var row = rows; row > 0; row--) {
-                var rowThreshold = rowChunk * row;
-                var annotationThreshold = rowChunk * (row + 1);
-                for (var turn = min; turn <= max; turn++) {
-                    var wins = FPRVs.Fetch(turn);
-                    string s = wins >= rowThreshold ? "##  " : (wins >= annotationThreshold ? wins.ToString().PadLeft(4, ' '): "    ");
-                    Console.Write(s);
-                }
-                Console.WriteLine();
-            }
-            for (var i = min; i <= max; i++)
-                Console.Write($"{i.ToString().PadLeft(2, ' ')}  ");
-            Console.WriteLine();
-            for (var row = 0; row < rows; row++) {
-                var rowThreshold = rowChunk * row;
-                for (var turn = min; turn <= max; turn++)
-                    Console.Write(SARVs.Fetch(turn) >= rowThreshold ? "@@  " : "    ");
-                Console.WriteLine();
-            }
-            Console.WriteLine($"{FPRVs} fprvs");
-            Console.WriteLine($"{SARVs} sarvs");
+            var minTurn = Math.Min(fmin, smin);
+            var maxTurn = Math.Max(fmax, smax);
+            const int heightPx = 30;
+            int fpMaxHeight = FPRVs.MedianHeight();
+            int saMaxHeight = SARVs.MedianHeight();
+            int trialsPerPixel = Math.Max(fpMaxHeight, saMaxHeight) / heightPx;
+            var viewport = new RectangleInt(
+                minTurn,
+                fpMaxHeight / trialsPerPixel + 1,
+                maxTurn + 1,
+                -(saMaxHeight / trialsPerPixel + 1));
+            var r = new Raster<string>(viewport, "");
+            // horizontal axis
+            for (var turn = minTurn; turn <= maxTurn; turn++)
+                r.DrawPoint(turn, 0, turn.ToString());
+            // FPRV bars
+            for (var turn = minTurn; turn <= maxTurn; turn++)
+                r.DrawRectangle(RectangleInt.XYWH(turn, 1, 1, FPRVs.Fetch(turn) / trialsPerPixel), "##");
+            for (var turn = minTurn; turn <= maxTurn; turn++)
+                r.DrawRectangle(RectangleInt.XYWH(turn, 0, 1, -SARVs.Fetch(turn) / trialsPerPixel), "@@");
+            Console.WriteLine(r.ToAsciiArt(4));
         }
     }
 }
