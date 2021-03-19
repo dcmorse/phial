@@ -4,14 +4,16 @@ namespace phial
 {
     class Quest
     {
-        public Quest(int shadowHuntAllocated, ILogger log)
+        public Quest(FreeStrategy strategy, int shadowHuntAllocated, ILogger log)
         {
+            FreeStrategy = strategy;
             ShadowHuntAllocated = shadowHuntAllocated;
             ShadowRolled = 7 - shadowHuntAllocated;
             HuntBag = new HuntBag();
             Log = log;
         }
 
+        private FreeStrategy FreeStrategy { get; }
         private int ShadowHuntAllocated { get; }
         private int ShadowRolled { get; }
         private HuntBag HuntBag { get; }
@@ -44,7 +46,6 @@ namespace phial
         public bool? TookMoria { get; set; }
         public bool Revealed { get; set; } = false;
         public Fellowship Fellowship { get; set; } = new Fellowship();
-        public Strategy Strategy { get; set; } = new StriderSprint();
         public int EffectiveDistanceFromRivendell
         {
             get
@@ -110,21 +111,24 @@ namespace phial
             {
                 var tile = HuntBag.DrawTile();
                 Log.Log($"    stronghold tile {tile}");
-                Strategy.Hunt(tile.Value(0), false, tile, this);
+                FreeStrategy.Hunt(tile.Value(0), false, tile, this);
             }
         }
 
         bool GandalfDeadTheFirstTime { get; set; } = false; // set to true when he leaves fsp
         int FreeActionDiceCount { get; set; } = 4;
 
-        bool PromoteGandalfIfAble(FreeActionDiceRoll freeDice) {
-            if (GandalfDeadTheFirstTime && freeDice.WillOfTheWests > 0) {
-                GandalfDeadTheFirstTime = false; 
+        bool PromoteGandalfIfAble(FreeActionDiceRoll freeDice)
+        {
+            if (GandalfDeadTheFirstTime && freeDice.WillOfTheWests > 0)
+            {
+                GandalfDeadTheFirstTime = false;
                 --freeDice.WillOfTheWests;
                 ++FreeActionDiceCount;
                 Log.Log("  ____Gandalf the White____");
-                return true;    
-            } else 
+                return true;
+            }
+            else
                 return false;
         }
 
@@ -139,9 +143,9 @@ namespace phial
                 }
                 int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
                 int freeHuntBoxDiceCount = 0;
-                var freeDice = new FreeActionDiceRoll(FreeActionDiceCount); 
+                var freeDice = new FreeActionDiceRoll(FreeActionDiceCount);
                 Log.Log($"Turn {Turns}: {eyes} eyes, {freeDice}");
-                
+
                 while (freeDice.CharacterOrWills > 0 || StriderCanHide(freeDice))
                 {
                     if (PromoteGandalfIfAble(freeDice))
@@ -173,8 +177,8 @@ namespace phial
                             var tile = HuntBag.DrawTile();
                             int huntValue = tile.Value(hits);
                             bool wasRevealed = Revealed;
-                            Log.Log($"  walk {EffectiveDistanceFromRivendell+1} {Pluralize("step", EffectiveDistanceFromRivendell+1)} from Rivendell  - {hits} {Pluralize("hit", hits)} - {tile}");
-                            Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
+                            Log.Log($"  walk {EffectiveDistanceFromRivendell + 1} {Pluralize("step", EffectiveDistanceFromRivendell + 1)} from Rivendell  - {hits} {Pluralize("hit", hits)} - {tile}");
+                            FreeStrategy.Hunt(huntValue, tile.Reveal(), tile, this);
                             ++Progress;
                             bool freshlyRevealed = (!wasRevealed) && Revealed;
                             if (freshlyRevealed) RevealFellowshipOutsideMordorAndResolveStrongholdTiles();
@@ -203,7 +207,7 @@ namespace phial
                 var freeDice = new FreeActionDiceRoll(FreeActionDiceCount);
 
                 Log.Log($"Turn {Turns}: {eyes} eyes, {freeDice}");
-                
+
                 while (freeDice.CharacterOrWills > 0 || StriderCanHide(freeDice))
                 {
                     if (StriderCanHide(freeDice))
@@ -223,7 +227,7 @@ namespace phial
                         var tile = HuntBag.DrawTile();
                         int huntValue = tile.Value(eyes);
                         Log.Log($"  from step {MordorTrackStep} {tile} = {huntValue}");
-                        Strategy.Hunt(huntValue, tile.Reveal(), tile, this);
+                        FreeStrategy.Hunt(huntValue, tile.Reveal(), tile, this);
                         if (!tile.Stop()) MordorTrackStep++;
                         eyes++;
                         Log.Log($"    corruption {Corruption}, {eyes} eyes");
@@ -241,7 +245,8 @@ namespace phial
             }
         }
 
-        private bool StriderCanHide(FreeActionDiceRoll freeDice) {
+        private bool StriderCanHide(FreeActionDiceRoll freeDice)
+        {
             return Revealed && (Fellowship.Guide is Strider) && freeDice.Count > 0;
         }
 
@@ -262,9 +267,11 @@ namespace phial
                 Corruption += damage;
                 Log.Log($"    {companion} falls to {tileValue} damage");
                 TakeCasualty(companion);
-            } else {
+            }
+            else
+            {
                 Corruption = Math.Max(0, Corruption + tileValue); // heal from hunt tiles
-                if (tileValue < 0) 
+                if (tileValue < 0)
                     Log.Log($"    Frodo heals to {Corruption} corruption");
             }
         }
@@ -278,9 +285,11 @@ namespace phial
 
         public void ResolveTileWithGollum(int tileValue, bool reveal, Tile tile, bool reduceDamageByRevealing)
         {
-            if (!(tile.IsEye() || tile.IsShadowSpecial())) {
+            if (!(tile.IsEye() || tile.IsShadowSpecial()))
+            {
                 reveal = false;
-                if (reduceDamageByRevealing && tileValue > 0) {
+                if (reduceDamageByRevealing && tileValue > 0)
+                {
                     --tileValue;
                     reveal = true;
                 }
@@ -288,7 +297,8 @@ namespace phial
             ResolveTileWithCorruption(tileValue, reveal, tile);
         }
 
-        void TakeCasualty(Companion c) {
+        void TakeCasualty(Companion c)
+        {
             if (c is Gandalf)
                 GandalfDeadTheFirstTime = true;
             Fellowship = Fellowship.RemoveCompanion(c);

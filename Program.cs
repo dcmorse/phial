@@ -14,10 +14,10 @@ namespace phial
             // Console.WriteLine(raster.ToAsciiArt(3));
         }
 
-        static void RunOne()
+        static void RunOne(FreeStrategy strategy)
         {
             var logger = new ConsoleLogger();
-            var q = new Quest(1, logger);
+            var q = new Quest(strategy, 1, logger);
             q.FromRivendell();
             logger.Log(q.ToString());
         }
