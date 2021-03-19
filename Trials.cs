@@ -28,13 +28,9 @@ namespace phial
         {
             Console.WriteLine($"{TrialCount} trials");
             Console.WriteLine($"FPRV median is {FPRVs.MedianIndex()} with {FPRVs.Fetch(FPRVs.MedianIndex())}");
-            var (fmin, fmax) = FPRVs.Domain();
-            var (smin, smax) = SARVs.Domain();
-            var minTurn = Math.Min(fmin, smin);
-            var maxTurn = Math.Max(fmax, smax);
+            (int minTurn, int maxTurn) = Turns();
+            (int fpMaxHeight, int saMaxHeight) = Range();
             const int heightPx = 30;
-            int fpMaxHeight = FPRVs.MedianHeight();
-            int saMaxHeight = SARVs.MedianHeight();
             int trialsPerPixel = Math.Max(fpMaxHeight, saMaxHeight) / heightPx;
             var viewport = new RectangleInt(
                 minTurn - 1,
@@ -66,17 +62,23 @@ namespace phial
             Console.WriteLine(r.ToAsciiArt(5));
         }
 
-        // (int, int) Turns()
-        // {
-        //     var (fmin, fmax) = FPRVs.Domain();
-        //     var (smin, smax) = SARVs.Domain();
-        //     var minTurn = Math.Min(fmin, smin);
-        //     var maxTurn = Math.Max(fmax, smax);
-        //     return (minTurn, maxTurn);
-        // }
-        // public static void ReportDifference(Trials plus, Trials minus)
-        // {
+        (int, int) Turns()
+        {
+            var (fmin, fmax) = FPRVs.Domain();
+            var (smin, smax) = SARVs.Domain();
+            var minTurn = Math.Min(fmin, smin);
+            var maxTurn = Math.Max(fmax, smax);
+            return (minTurn, maxTurn);
+        }
+        (int, int) Range()
+        {
+            int fpMaxHeight = FPRVs.MedianHeight();
+            int saMaxHeight = SARVs.MedianHeight();
+            return (fpMaxHeight, saMaxHeight);
+        }
+        public static void ReportDifference(Trials plus, Trials minus)
+        {
 
-        // }
+        }
     }
 }

@@ -6,7 +6,9 @@ namespace phial
     {
         static void Main(string[] args)
         {
-            new Trials().Report();
+            var seven = new Trials(new StriderSprint(7));
+            var four = new Trials(new StriderSprint(4));
+            four.Report();
             // RunOne();
             // var raster = new Raster<string>(RectangleInt.XYWH(2, 2, 10, 10), ".");
             // raster.DrawRectangle(RectangleInt.XYWH(2, 2, 5, 5), "#");
