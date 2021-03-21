@@ -32,20 +32,25 @@ namespace phial
             return MordorTrackStep >= 5 && !IsCorrupted();
         }
 
-        public bool AtTheGatesOfMordor()
+        public int DistanceToGatesOfMordor()
         {
             int moves = EffectiveDistanceFromRivendell;
             int movesNeeded = 10 + (TookMoria ?? true ? 0 : 1);
-            return moves >= movesNeeded;
+            return Math.Max(movesNeeded - moves, 0);
         }
-        public int Turns { get; set; } = 0;
-        public int Corruption { get; set; } = 0;
-        public int MordorTrackStep { get; set; } = 0;
-        public int Progress { get; set; } = 0;
-        public int LastKnownDistanceFromRivendell { get; set; } = 0;
-        public bool? TookMoria { get; set; }
-        public bool Revealed { get; set; } = false;
-        public Fellowship Fellowship { get; set; } = new Fellowship();
+        public bool AtTheGatesOfMordor()
+        {
+            return 0 == DistanceToGatesOfMordor();
+        }
+        public int Turns { get; private set; } = 0;
+        public int Corruption { get; private set; } = 0;
+        public int MordorTrackStep { get; private set; } = 0;
+        public bool IsInMordor { get; private set; } = false;
+        public int Progress { get; private set; } = 0;
+        public int LastKnownDistanceFromRivendell { get; private set; } = 0;
+        public bool? TookMoria { get; private set; }
+        public bool Revealed { get; private set; } = false;
+        public Fellowship Fellowship { get; private set; } = new Fellowship();
         public int EffectiveDistanceFromRivendell
         {
             get
@@ -61,6 +66,7 @@ namespace phial
                 TookMoria = 10 == EffectiveDistanceFromRivendell;
             }
             Progress = 0;
+            IsInMordor = true;
             Log.Log($"____Enter Mordor____  took moria = {TookMoria}");
         }
 
@@ -250,23 +256,38 @@ namespace phial
             return Revealed && (Fellowship.Guide is Strider) && freeDice.Count > 0;
         }
 
-        public void ResolveTileWithGuideCasualty(int tileValue, bool reveal, Tile tile)
+        public void ResolveTileWithGuideCasualty(int damage, bool reveal, Tile tile)
         {
-            ResolveTileWithCasualty(Fellowship.Guide, tileValue, reveal, tile);
+            (damage, reveal) = ApplyGuidePowers(damage, reveal, tile);
+            ResolveTileWithCasualty(Fellowship.Guide, damage, reveal, tile);
         }
-        public void ResolveTileWithRandomCasualty(int tileValue, bool reveal, Tile tile)
+
+        public void ResolveTileWithRandomCasualty(int damage, bool reveal, Tile tile)
         {
-            ResolveTileWithCasualty(Fellowship.Random(), tileValue, reveal, tile);
+            (damage, reveal) = ApplyGuidePowers(damage, reveal, tile);
+            ResolveTileWithCasualty(Fellowship.Random(), damage, reveal, tile);
+        }
+
+        private (int, bool) ApplyGuidePowers(int tileValue, bool reveal, Tile tile)
+        {
+            List<Companion> separatedCompanions;
+            (tileValue, reveal, separatedCompanions) = FreeStrategy.CalculateGuidePowers(tileValue, reveal, tile, this);
+            if (separatedCompanions.Count > 0)
+                SeparateCompanions(separatedCompanions);
+            return (tileValue, reveal);
         }
         public void ResolveTileWithCasualty(Companion companion, int tileValue, bool reveal, Tile tile)
         {
-            Revealed = Revealed || reveal;
             if (tileValue > 0)
             {
                 int damage = Math.Max(0, tileValue - companion.Level());
+                // more companion separation here. 
                 Corruption += damage;
-                Log.Log($"    {companion} falls to {tileValue} damage");
-                TakeCasualty(companion);
+                if (companion.IsRemovable())
+                {
+                    Log.Log($"    {companion} falls to {tileValue} damage");
+                    TakeCasualty(companion);
+                }
             }
             else
             {
@@ -274,6 +295,7 @@ namespace phial
                 if (tileValue < 0)
                     Log.Log($"    Frodo heals to {Corruption} corruption");
             }
+            Revealed = Revealed || reveal;
         }
 
         public void ResolveTileWithCorruption(int tileValue, bool reveal, Tile tile)
@@ -283,25 +305,19 @@ namespace phial
             Log.Log($"    taking {tileValue} corruption");
         }
 
-        public void ResolveTileWithGollum(int tileValue, bool reveal, Tile tile, bool reduceDamageByRevealing)
-        {
-            if (!(tile.IsEye() || tile.IsShadowSpecial()))
-            {
-                reveal = false;
-                if (reduceDamageByRevealing && tileValue > 0)
-                {
-                    --tileValue;
-                    reveal = true;
-                }
-            }
-            ResolveTileWithCorruption(tileValue, reveal, tile);
-        }
 
-        void TakeCasualty(Companion c)
+        public void TakeCasualty(Companion c)
         {
             if (c is Gandalf)
                 GandalfDeadTheFirstTime = true;
             Fellowship = Fellowship.RemoveCompanion(c);
+        }
+
+        public void SeparateCompanions(List<Companion> companions)
+        {
+            Log.Log($"    {String.Join(", ", companions)} separate");
+            foreach (Companion c in companions)
+                Fellowship = Fellowship.RemoveCompanion(c);
         }
 
         public override string ToString()

@@ -6,9 +6,10 @@ namespace phial
 {
     class Trials
     {
-        int TrialCount { get; } = 10000;
+        int TrialCount { get; } = 500000;
         Histogram<int> FPRVs { get; } = new Histogram<int>();
         Histogram<int> SARVs { get; } = new Histogram<int>();
+        const int ReportHeightPixels = 100;
 
         public Trials(FreeStrategy strategy)
         {
@@ -45,21 +46,19 @@ namespace phial
             // SARV bars
             for (var turn = minTurn; turn <= maxTurn; turn++)
                 r.DrawRectangle(RectangleInt.XYWH(turn, 0, 1, -SARVs.Fetch(turn) / trialsPerPixel), " @@@");
-            // for (var turn = minTurn; turn <= maxTurn; turn++)
-            // {
-            //     int y = FPRVs.Fetch(turn);
-            //     r.DrawPoint(turn, 1 + y / trialsPerPixel, y.ToString().PadLeft(ReportPixelWidth - 1));
-            // }
-            // for (var turn = minTurn; turn <= maxTurn; turn++)
-            // {
-            //     int y = SARVs.Fetch(turn);
-            //     r.DrawPoint(turn, -1 - y / trialsPerPixel, y.ToString().PadLeft(ReportPixelWidth - 1));
-            // }
+            for (var turn = minTurn; turn <= maxTurn; turn++)
+            {
+                int y = FPRVs.Fetch(turn);
+                r.DrawPoint(turn, 1 + y / trialsPerPixel, y.ToString().PadLeft(ReportPixelWidth - 1));
+            }
+            for (var turn = minTurn; turn <= maxTurn; turn++)
+            {
+                int y = SARVs.Fetch(turn);
+                r.DrawPoint(turn, -1 - y / trialsPerPixel, y.ToString().PadLeft(ReportPixelWidth - 1));
+            }
             Console.WriteLine(r.ToAsciiArt(ReportPixelWidth));
         }
 
-
-        const int ReportHeightPixels = 10;
         const int ReportPixelWidth = 5;
 
         (int, int) Turns()
@@ -118,6 +117,23 @@ namespace phial
                 {
                     string color = pHeight > mHeight ? " +++" : " ---";
                     r.DrawRectangle(new RectangleInt(turn, sharedTop + 1, turn + 1, peakedTop + 1), color);
+                }
+            }
+            // SAMV bars
+            for (var turn = minTurn; turn <= maxTurn; turn++)
+            {
+                var pHeight = plus.SARVs.Fetch(turn) / trialsPerPixel;
+                var mHeight = minus.SARVs.Fetch(turn) / trialsPerPixel;
+                var sharedTop = Min(pHeight, mHeight);
+                var peakedTop = Max(pHeight, mHeight);
+                if (sharedTop > 0)
+                {
+                    r.DrawRectangle(new RectangleInt(turn, 0, turn + 1, -sharedTop), " @@@");
+                }
+                if (peakedTop > sharedTop)
+                {
+                    string color = pHeight > mHeight ? " +++" : " ---";
+                    r.DrawRectangle(new RectangleInt(turn, -sharedTop, turn + 1, -peakedTop), color);
                 }
             }
             Console.WriteLine(r.ToAsciiArt(5));

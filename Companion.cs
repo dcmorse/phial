@@ -7,6 +7,10 @@ namespace phial
         {
             return true;
         }
+        public virtual bool GuideSeperateable()
+        {
+            return false;
+        }
     }
     class Level3 : Companion
     {
@@ -44,11 +48,17 @@ namespace phial
     }
     class Merry : Level1
     {
-
+        public override bool GuideSeperateable()
+        {
+            return true;
+        }
     }
     class Pippin : Level1
     {
-
+        public override bool GuideSeperateable()
+        {
+            return true;
+        }
     }
     class Gollum : Companion
     {

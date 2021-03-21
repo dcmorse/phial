@@ -6,10 +6,11 @@ namespace phial
     {
         static void Main(string[] args)
         {
-            var seven = new Trials(new StriderSprint(7));
-            var four = new Trials(new StriderSprint(4));
-            Trials.ReportDifference(four, seven);
-            // RunOne();
+            // var yesG = new Trials(new StriderSprint(6, true));
+            // var noG = new Trials(new StriderSprint(6, false));
+            // Trials.ReportDifference(yesG, noG);
+
+            RunOne(new StriderSprint(6, true));
         }
 
         static void RunOne(FreeStrategy strategy)
