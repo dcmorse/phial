@@ -11,6 +11,11 @@ namespace phial
         {
             return false;
         }
+
+        public override string ToString()
+        {
+            return GetType().Name;
+        }
     }
     class Level3 : Companion
     {
