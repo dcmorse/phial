@@ -33,7 +33,8 @@ namespace phial
 
         private Companion[] Companions { get; }
         public Companion Guide { get { return Companions[0]; } }
-        public Companion Random() {
+        public Companion Random()
+        {
             return Companions[RandomState.Next(Companions.Length)];
         }
         private Random RandomState = new Random();

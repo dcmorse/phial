@@ -6,10 +6,10 @@ namespace phial
 {
     class Trials
     {
-        int TrialCount { get; } = 500000;
+        int TrialCount { get; } = 10000;
         Histogram<int> FPRVs { get; } = new Histogram<int>();
         Histogram<int> SARVs { get; } = new Histogram<int>();
-        const int ReportHeightPixels = 100;
+        const int ReportHeightPixels = 30;
 
         public Trials(FreeStrategy strategy)
         {
