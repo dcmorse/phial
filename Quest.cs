@@ -8,14 +8,13 @@ namespace phial
         {
             FreeStrategy = strategy;
             ShadowHuntAllocated = shadowHuntAllocated;
-            ShadowRolled = 7 - shadowHuntAllocated;
             HuntBag = new HuntBag();
             Log = log;
         }
 
         private FreeStrategy FreeStrategy { get; }
         private int ShadowHuntAllocated { get; }
-        private int ShadowRolled { get; }
+        private int Minions { get; set; }
         private HuntBag HuntBag { get; }
         private ILogger Log { get; }
 
@@ -147,10 +146,10 @@ namespace phial
                     EnterMordor();
                     return MordorTrack();
                 }
-                int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
+                ShadowActionDiceRoll shadowDice = new ShadowActionDiceRoll(7 + Minions, ShadowHuntAllocated);
                 int freeHuntBoxDiceCount = 0;
                 var freeDice = new FreeActionDiceRoll(FreeActionDiceCount);
-                Log.Log($"Turn {Turns}: {eyes} eyes, {freeDice}");
+                Log.Log($"Turn {Turns}: {shadowDice.Eyes} eyes, {freeDice}");
 
                 while (freeDice.CharacterOrWills > 0 || StriderCanHide(freeDice))
                 {
@@ -177,7 +176,7 @@ namespace phial
                     }
                     else
                     {
-                        int hits = D6.CountHits(eyes, 6 - freeHuntBoxDiceCount);
+                        int hits = D6.CountHits(shadowDice.Eyes, 6 - freeHuntBoxDiceCount);
                         if (hits > 0)
                         {
                             var tile = HuntBag.DrawTile();
@@ -189,7 +188,7 @@ namespace phial
                             bool freshlyRevealed = (!wasRevealed) && Revealed;
                             if (freshlyRevealed) RevealFellowshipOutsideMordorAndResolveStrongholdTiles();
                             ++freeHuntBoxDiceCount;
-                            Log.Log($"    corruption {Corruption}, {eyes} eyes");
+                            Log.Log($"    corruption {Corruption}, {shadowDice.Eyes} eyes");
                         }
                         else
                         {
@@ -208,11 +207,13 @@ namespace phial
         {
             for (; ; Turns++)
             {
-                int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
+                // int eyes = ShadowHuntAllocated + D6.CountHits(ShadowRolled, 6);
+                ShadowActionDiceRoll shadowDice = new ShadowActionDiceRoll(7 + Minions, ShadowHuntAllocated);
                 bool movedOrHidThisTurn = false;
                 var freeDice = new FreeActionDiceRoll(FreeActionDiceCount);
+                int freeHuntBox = 0;
 
-                Log.Log($"Turn {Turns}: {eyes} eyes, {freeDice}");
+                Log.Log($"Turn {Turns}: {shadowDice.Eyes} eyes, {freeDice}");
 
                 while (freeDice.CharacterOrWills > 0 || StriderCanHide(freeDice))
                 {
@@ -231,12 +232,12 @@ namespace phial
                     else
                     {
                         var tile = HuntBag.DrawTile();
-                        int huntValue = tile.Value(eyes);
+                        int huntValue = tile.Value(shadowDice.Eyes + freeHuntBox);
                         Log.Log($"  from step {MordorTrackStep} {tile} = {huntValue}");
                         FreeStrategy.Hunt(huntValue, tile.Reveal(), tile, this);
                         if (!tile.Stop()) MordorTrackStep++;
-                        eyes++;
-                        Log.Log($"    corruption {Corruption}, {eyes} eyes");
+                        freeHuntBox++;
+                        Log.Log($"    corruption {Corruption}, {shadowDice.Eyes} eyes");
                         freeDice.SpendCharacterOrWill();
                         if (IsOver())
                             return this;
